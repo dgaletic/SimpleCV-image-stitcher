@@ -18,32 +18,44 @@ class Timer(threading.Thread):
     def set_time(self, time):
         self.time = time
 
-    def tick(self):
-        import copy # Workaround for dl.clear() issue
-        self.dl_copy = copy.copy(self.dl[0]) # Workaround for dl.clear() issue
+    def set_starting_image(self, image):
+        self.img = image
 
-        self.time_left = self.time
-        width = self.dl[0].width 
-        height = self.dl[0].height
-        while self.time_left:
-            self.dl[0].text(str(self.time_left), (width / 2, height / 2))
-            self.time_left -= 1
-            time.sleep(1)
-            # FIXME: dl.clear() causes
-            # AttributeError: DrawingLayer instance has no attribute '_mImage'
-            # self.dl.clear()
-
-            # Is it cheaper to do this or create new drawing layers?
-            # Probably the layers.
-            # TODO: mutex lock.
-            self.dl[0] = copy.copy(self.dl_copy) 
-            # mutex release
-                
     def set_drawing_layer(self, drawing_layer):
         self.dl = drawing_layer
 
     def get_drawing_layer(self):
         return self.dl
+
+    def tick(self):
+
+        self.time_left = self.time
+        width = self.dl[0].width 
+        height = self.dl[0].height
+        while self.time_left:
+            # create new layer
+            layer_id = self.img.addDrawingLayer()
+            new_dl = self.img.dl()
+            # draw into it
+            new_dl.text(str(self.time_left), (width / 2, height / 2))
+            # But we don't actually want it to display text on the 
+            # self.img image, that image is just to fetch the settings.
+
+            # TODO
+            # mutex lock.
+            self.dl[0] = new_dl
+            # mutex release
+
+            self.time_left -= 1
+            time.sleep(1)
+
+            ## FIXME: dl.clear() causes
+            ## AttributeError: DrawingLayer instance has no attribute '_mImage'
+            ## self.dl.clear()
+    
+
+           
+                
 
 
 # main thread
@@ -53,24 +65,24 @@ disp = Display.Display()
 
 timer = Timer()
 timer.daemon = True
-timer.set_time(10)
+timer.set_time(5)
 
 img = cam.getImage()
-text_layer = [img.dl()] # [] is a workaround for dl.clear()
+timer.set_starting_image(img)
+
+# [] is a workaround for dl.clear()
+text_layer = [img.dl()] 
 timer.set_drawing_layer(text_layer)
+
 timer.start()
 
-while not disp.isDone():
-    if disp.mouseLeft:
-        break
+while timer.is_alive():
     img = cam.getImage()
-    if not thread.isAlive():
-        img.clearLayers()
-        img.addDrawingLayer(text_layer[0])
-        dl = img.dl()
-        timer.set_drawing_layer([dl])
-    # else, it will just redraw the old value
+    # TODO
+    # if mutex not locked:
+    img.clearLayers()
+    img.addDrawingLayer(text_layer[0])
+    # else, make it redraw the old value
     img.show()
-    
-
-quit()
+img = cam.getImage()
+img.save("/home/dgaletic/cheese.png")
