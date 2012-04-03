@@ -1,4 +1,5 @@
-# Camera timer
+# This program displays countdown over your camera feed and takes a 
+# photo of you once it reaches 0.
 
 import SimpleCV
 from SimpleCV import Display
@@ -7,8 +8,6 @@ import time # Should be in the Timer class
 
 class Timer(threading.Thread):
     def run(self):
-        # "global name time not defined"; why?
-        # import time 
         self.tick()
 
     def __init__(self, time = 5):
@@ -38,10 +37,10 @@ class Timer(threading.Thread):
             new_dl = self.img.dl()
             # draw into it
             new_dl.text(str(self.time_left), (width / 2, height / 2))
-            # But we don't actually want it to display text on the 
+            # We don't actually want it to display text on the 
             # self.img image, that image is just to fetch the settings.
 
-            # TODO
+            # TODO (urgent!)
             # mutex lock.
             self.dl[0] = new_dl
             # mutex release
@@ -55,11 +54,6 @@ class Timer(threading.Thread):
     
 
            
-                
-
-
-# main thread
-
 cam = SimpleCV.Camera()
 disp = Display.Display()
 
@@ -70,7 +64,7 @@ timer.set_time(5)
 img = cam.getImage()
 timer.set_starting_image(img)
 
-# [] is a workaround for dl.clear()
+# [] is a workaround for (the lack of) dl.clear()
 text_layer = [img.dl()] 
 timer.set_drawing_layer(text_layer)
 
