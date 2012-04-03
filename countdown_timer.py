@@ -85,4 +85,4 @@ while timer.is_alive():
     # else, make it redraw the old value
     img.show()
 img = cam.getImage()
-img.save("/home/dgaletic/cheese.png")
+img.save("cheese.png")
