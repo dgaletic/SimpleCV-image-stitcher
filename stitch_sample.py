@@ -3,8 +3,6 @@ import os
 import time
 from numpy import vstack,hstack
 
-
-
 c = SimpleCV.Camera()
 
 # Without this 0.5 sec sleep, the first image my camera takes is very dark, 
@@ -20,9 +18,10 @@ for i in range(10):
 
 mat = vstack(matrices)
 img_stitched = SimpleCV.Image(mat)
-print "Images saved in", os.getcwd()
 img_stitched.save("stitched_h.png")
 
 mat = hstack(matrices)
 img_stitched = SimpleCV.Image(mat)
 img_stitched.save("stitched_v.png")
+
+print "Images saved in", os.getcwd()
