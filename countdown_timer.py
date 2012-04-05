@@ -40,7 +40,7 @@ class Timer(threading.Thread):
             # We don't actually want it to display text on the 
             # self.img image, that image is just to fetch the settings.
 
-            # TODO (urgent!)
+            # TODO (important)
             # mutex lock.
             self.dl[0] = new_dl
             # mutex release
@@ -53,30 +53,31 @@ class Timer(threading.Thread):
             ## self.dl.clear()
     
 
-           
 cam = SimpleCV.Camera()
 disp = Display.Display()
 
-timer = Timer()
-timer.daemon = True
-timer.set_time(5)
+number_of_photos = 5
+photos_taken = 1
+while (photos_taken <= number_of_photos):
+    timer = Timer()
+    timer.daemon = True
+    timer.set_time(3)
 
-img = cam.getImage()
-timer.set_starting_image(img)
-
-# [] is a workaround for (the lack of) dl.clear()
-text_layer = [img.dl()] 
-timer.set_drawing_layer(text_layer)
-
-timer.start()
-
-while timer.is_alive():
     img = cam.getImage()
-    # TODO
-    # if mutex not locked:
-    img.clearLayers()
-    img.addDrawingLayer(text_layer[0])
-    # else, make it redraw the old value
-    img.show()
-img = cam.getImage()
-img.save("cheese.png")
+    timer.set_starting_image(img)
+
+    # [] is a workaround for (the lack of) dl.clear()
+    text_layer = [img.dl()] 
+    timer.set_drawing_layer(text_layer)
+    timer.start()
+
+    while timer.is_alive():
+        img = cam.getImage()
+        # TODO
+        # if mutex not locked:
+        img.addDrawingLayer(text_layer[0])
+        # else, make it redraw the old value
+        img.show()
+    img = cam.getImage()
+    img.save("cheese_" + str(photos_taken) + ".png")
+    photos_taken += 1
